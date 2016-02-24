@@ -33,6 +33,23 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
+func TestClientNewRequest(t *testing.T) {
+	c := NewClient(nil, "", "")
+	req, err := c.NewRequest("address/15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if req.Method != "GET" {
+		t.Errorf("NewRequest wrong method %q, want GET", req.Method)
+	}
+
+	uri := "https://blockchain.info/address/15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S?format=json"
+	if req.URL.String() != uri {
+		t.Errorf("NewRequest wrong URL %q, want %q", req.URL, uri)
+	}
+}
+
 func TestClientNewMerchantRequest(t *testing.T) {
 	c := NewClient(nil, "w1731", "R@GK")
 	req, err := c.NewMerchantRequest("list")

@@ -42,6 +42,14 @@ func NewClient(httpClient *http.Client, wallet, pass string) *Client {
 	return c
 }
 
+// NewRequest creates a request to the public API.
+func (c *Client) NewRequest(path string) (*http.Request, error) {
+	urlStr := fmt.Sprintf("%s/%s?format=json", c.BaseURL, path)
+
+	req, err := http.NewRequest("GET", urlStr, nil)
+	return req, err
+}
+
 // NewMerchantRequest creates a request to the Merchant API.
 func (c *Client) NewMerchantRequest(path string) (*http.Request, error) {
 	urlStr := fmt.Sprintf("%s/%s/%s", c.MerchantURL, c.WalletID, path)
