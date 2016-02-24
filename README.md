@@ -8,7 +8,17 @@ and [stripe-go](https://github.com/stripe/stripe-go/).
 ```go
 client = blockchain.NewClient(nil, "w1731", "R@GK")
 fmt.Println(client.Wallet.Addresses())
-// [{15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66  20090584076}]
+// [{13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY  20090584076}]
+```
+
+## Get Address Summary
+
+Address represents https://blockchain.info/address/13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY?format=json
+resource.
+
+```go
+client = blockchain.NewClient(nil, "", "")
+fmt.Println(client.Data.Address("13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY"))
 ```
 
 ## Testing
