@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAddressList(t *testing.T) {
+func TestWalletAddresses(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -25,15 +25,15 @@ func TestAddressList(t *testing.T) {
 		fmt.Fprint(w, js)
 	})
 
-	addrs, err := client.Address.List()
+	addrs, err := client.Wallet.Addresses()
 	if err != nil {
 		t.Error(err)
 	}
 
-	want := []Address{
+	want := []WalletAddress{
 		{Address: "15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S", Balance: 20090584076},
 	}
 	if !reflect.DeepEqual(addrs, want) {
-		t.Errorf("Address.List returned %v, want %v", addrs, want)
+		t.Errorf("Wallet.Addresses returned %v, want %v", addrs, want)
 	}
 }

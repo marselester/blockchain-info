@@ -21,7 +21,7 @@ type Client struct {
 	WalletID     string
 	MainPassword string
 
-	Address *AddressService
+	Wallet *WalletService
 }
 
 // NewClient returns a new Blockchain.info API client. If a nil httpClient is
@@ -38,7 +38,7 @@ func NewClient(httpClient *http.Client, wallet, pass string) *Client {
 		WalletID:     wallet,
 		MainPassword: pass,
 	}
-	c.Address = &AddressService{client: c}
+	c.Wallet = &WalletService{client: c}
 	return c
 }
 
