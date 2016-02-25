@@ -1,68 +1,143 @@
 package blockchain
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
+	"time"
 )
 
-func TestNewClient(t *testing.T) {
-	walletID := "w1731"
-	mainPass := "R@GK"
-	c := NewClient(nil, walletID, mainPass)
+func TestBlockchainAddressHasNoTxs(t *testing.T) {
+	setup()
+	defer teardown()
 
-	if c.HTTPClient != http.DefaultClient {
-		t.Errorf("NewClient should have default HTTP client, got %v", c.HTTPClient)
-	}
-
-	baseURL := "https://blockchain.info"
-	if c.BaseURL != baseURL {
-		t.Errorf("NewClient should have base URL %q, got %v", baseURL, c.BaseURL)
-	}
-
-	merchantURL := "https://blockchain.info/merchant"
-	if c.MerchantURL != merchantURL {
-		t.Errorf("NewClient should have merchant URL %q, got %v", merchantURL, c.MerchantURL)
-	}
-
-	if c.WalletID != walletID {
-		t.Errorf("NewClient wrong wallet ID %q, want %q", c.WalletID, walletID)
-	}
-
-	if c.MainPassword != mainPass {
-		t.Errorf("NewClient wrong main password %q, want %q", c.MainPassword, mainPass)
-	}
+	js := `
+{
+	"hash160": "1a816ef92b552e5fb73dccfa8c98739b2da16035",
+	"address": "13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY",
+	"n_tx": 10,
+	"total_received": 335550944460,
+	"total_sent": 20090584076,
+	"final_balance": 315460360384,
+	"txs": []
 }
+`
+	address := "13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY"
+	mux.HandleFunc("/address/13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, js)
+	})
 
-func TestClientNewRequest(t *testing.T) {
-	c := NewClient(nil, "", "")
-	req, err := c.NewRequest("address/15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S")
+	a, err := client.Blockchain.Address(address)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if req.Method != "GET" {
-		t.Errorf("NewRequest wrong method %q, want GET", req.Method)
+	if a.Address != address {
+		t.Errorf("Blockchain.Address wrong address %q, want %q", a.Address, address)
 	}
 
-	uri := "https://blockchain.info/address/15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S?format=json"
-	if req.URL.String() != uri {
-		t.Errorf("NewRequest wrong URL %q, want %q", req.URL, uri)
+	if a.TxCount != 10 {
+		t.Errorf("Blockchain.Address wrong tx count %d, want %d", a.TxCount, 10)
+	}
+
+	if a.TotalReceived != 335550944460 {
+		t.Errorf("Blockchain.Address wrong total received %d, want %d", a.TotalReceived, 335550944460)
+	}
+
+	if a.TotalSent != 20090584076 {
+		t.Errorf("Blockchain.Address wrong total sent %d, want %d", a.TotalSent, 20090584076)
+	}
+
+	if a.FinalBalance != 315460360384 {
+		t.Errorf("Blockchain.Address wrong final balance %d, want %d", a.FinalBalance, 315460360384)
+	}
+
+	if len(a.Txs) != 0 {
+		t.Errorf("Blockchain.Address wrong transactions count %d, want 0", len(a.Txs))
 	}
 }
 
-func TestClientNewMerchantRequest(t *testing.T) {
-	c := NewClient(nil, "w1731", "R@GK")
-	req, err := c.NewMerchantRequest("list")
+func TestBlockchainAddressWithTxs(t *testing.T) {
+	setup()
+	defer teardown()
+
+	js := `
+{
+	"hash160": "1a816ef92b552e5fb73dccfa8c98739b2da16035",
+	"address": "13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY",
+	"n_tx": 10,
+	"total_received": 335550944460,
+	"total_sent": 20090584076,
+	"final_balance": 315460360384,
+	"txs": [{
+		"ver":1,
+		"inputs": [
+			{
+				"sequence": 4294967295,
+				"prev_out": {
+				"spent": true,
+				"tx_index": 114831414,
+				"type": 0,
+				"addr": "1Bbq8wAAk3jFT7sdtArhsJrCisosHMxhKy",
+				"value": 4600000000,
+				"n": 1,
+				"script": "76a9147447954676fac24a2c72a5b92407ead8157411e888ac"
+			},
+			"script":"483045022100ecaa92d4133e5aa77a0b7e9f9faf7f5562d5ff43d1b0b3d9af41578086a4d711022047eb75d22d696c28730ff66d16dd9307cc1a62ba6babd608e2c84468af10e4640121031f6e9b8aaaf76d05afff3fe8536eaa72387e0c0cf040e75d6bc85ce314c7dba5"
+		}],
+		"block_height": 387122,
+		"relayed_by": "127.0.0.1",
+		"out": [{
+			"spent": true,
+			"tx_index": 114834113,
+			"type": 0,
+			"addr": "3LKxFxbYeQaaRrKE1zRBxrHSzZftuTUDKB",
+			"value": 4599990000,
+			"n": 0,
+			"script": "a914cc6e98586ab52d57bd6272b89295f943d1544a8687"
+		}],
+		"lock_time": 0,
+		"result": 0,
+		"size": 190,
+		"time": 1449471605,
+		"tx_index": 114834113,
+		"vin_sz": 1,
+		"hash": "d5e1ffb5e0a235731f84a0e616f4ad1264db43bd61e7a00751b1151b9b01b488",
+		"vout_sz": 1
+	}]
+}
+`
+	address := "13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY"
+	mux.HandleFunc("/address/13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, js)
+	})
+
+	a, err := client.Blockchain.Address(address)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if req.Method != "GET" {
-		t.Errorf("NewMerchantRequest wrong method %q, want GET", req.Method)
+	if len(a.Txs) != 1 {
+		t.Errorf("Blockchain.Address wrong transactions count %d, want 1", len(a.Txs))
 	}
 
-	uri := "https://blockchain.info/merchant/w1731/list?password=R%40GK"
-	if req.URL.String() != uri {
-		t.Errorf("NewMerchantRequest wrong URL %q, want %q", req.URL, uri)
+	tx := a.Txs[0]
+
+	if tx.Index != 114834113 {
+		t.Errorf("Blockchain.Address wrong tx index %d, want 114834113", tx.Index)
+	}
+
+	hash := "d5e1ffb5e0a235731f84a0e616f4ad1264db43bd61e7a00751b1151b9b01b488"
+	if tx.Hash != hash {
+		t.Errorf("Blockchain.Address wrong tx hash %q, want %q", tx.Hash, hash)
+	}
+
+	if tx.BlockHeight != 387122 {
+		t.Errorf("Blockchain.Address wrong tx block height %d, want 387122", tx.BlockHeight)
+	}
+
+	timestamp := time.Unix(1449471605, 0)
+	if tx.Timestamp != Timestamp(timestamp) {
+		t.Errorf("Blockchain.Address wrong tx timestamp %v, want %v", tx.Timestamp, timestamp)
 	}
 }

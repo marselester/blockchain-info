@@ -6,13 +6,13 @@ type WalletAddress struct {
 	Balance int64
 }
 
-// WalletService handles communication with the Blockchain.info merchant API.
-type WalletService struct {
+// walletService handles communication with the Blockchain.info Wallet API.
+type walletService struct {
 	client *Client
 }
 
 // Addresses requests a slice of wallet addresses.
-func (s *WalletService) Addresses() ([]WalletAddress, error) {
+func (s *walletService) Addresses() ([]WalletAddress, error) {
 	req, err := s.client.NewMerchantRequest("list")
 	if err != nil {
 		return nil, err

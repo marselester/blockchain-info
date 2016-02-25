@@ -3,85 +3,80 @@ package blockchain
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
+	"time"
 )
 
-const (
-	baseURL     = "https://blockchain.info"
-	merchantURL = "https://blockchain.info/merchant"
-)
-
-// Client manages communication with the Blockchain.info API.
-type Client struct {
-	HTTPClient *http.Client
-
-	BaseURL      string
-	MerchantURL  string
-	WalletID     string
-	MainPassword string
-
-	Wallet *WalletService
-	Data   *DataService
+// Output is a transaction output.
+type Output struct {
+	// Blockchain.info's internal transcation ID.
+	TxIndex uint64
+	// Output index.
+	N       uint32
+	Address string
+	// Amount in satoshis.
+	Value   uint64
+	IsSpent bool
+	Script  string
 }
 
-// NewClient returns a new Blockchain.info API client. If a nil httpClient is
-// provided, http.DefaultClient will be used.
-func NewClient(httpClient *http.Client, wallet, pass string) *Client {
-	if httpClient == nil {
-		httpClient = http.DefaultClient
+// Input is a transaction input.
+type Input struct {
+	PrevOutput *Output
+	Script     string
+}
+
+// Tx represents a Bitcoin transaction.
+type Tx struct {
+	// Blockchain.info's internal transcation ID.
+	Index       uint64 `json:"tx_index"`
+	Hash        string
+	BlockHeight uint32    `json:"block_height"`
+	Timestamp   Timestamp `json:"time"`
+	Inputs      []Input
+	Outputs     []Output
+}
+
+// Address provides a summary of Bitcoin address.
+type Address struct {
+	Address       string
+	TxCount       uint   `json:"n_tx"`
+	TotalReceived uint64 `json:"total_received"`
+	TotalSent     uint64 `json:"total_sent"`
+	FinalBalance  int64  `json:"final_balance"`
+	Txs           []Tx
+}
+
+// Timestamp is used to parse Unix time in 1449471605 format.
+type Timestamp time.Time
+
+// UnmarshalJSON decodes Unix time given in seconds to Timestamp (which is time.Time)
+func (t *Timestamp) UnmarshalJSON(data []byte) error {
+	var sec int64
+	if err := json.Unmarshal(data, &sec); err != nil {
+		return fmt.Errorf("time should be an int, got %d", data)
 	}
 
-	c := &Client{
-		HTTPClient:   httpClient,
-		BaseURL:      baseURL,
-		MerchantURL:  merchantURL,
-		WalletID:     wallet,
-		MainPassword: pass,
-	}
-	c.Wallet = &WalletService{client: c}
-	c.Data = &DataService{client: c}
-	return c
+	*t = Timestamp(time.Unix(sec, 0))
+	return nil
 }
 
-// NewRequest creates a request to the public API.
-func (c *Client) NewRequest(path string) (*http.Request, error) {
-	urlStr := fmt.Sprintf("%s/%s?format=json", c.BaseURL, path)
-
-	req, err := http.NewRequest("GET", urlStr, nil)
-	return req, err
+// BlockchainService handles communication with the Blockchain.info Block Explorer API.
+type blockchainService struct {
+	client *Client
 }
 
-// NewMerchantRequest creates a request to the Merchant API.
-func (c *Client) NewMerchantRequest(path string) (*http.Request, error) {
-	urlStr := fmt.Sprintf("%s/%s/%s", c.MerchantURL, c.WalletID, path)
-	u, err := url.Parse(urlStr)
+// Address requests an address summary.
+func (s *blockchainService) Address(address string) (*Address, error) {
+	req, err := s.client.NewRequest("address/" + address)
 	if err != nil {
 		return nil, err
 	}
 
-	q := u.Query()
-	q.Set("password", c.MainPassword)
-	u.RawQuery = q.Encode()
-
-	req, err := http.NewRequest("GET", u.String(), nil)
-	return req, err
-}
-
-// Do uses the Blockchain.info API client's HTTP client to execute the request
-// and unmarshals the response into v.
-// It also handles unmarshaling errors returned by the API.
-func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
-	resp, err := c.HTTPClient.Do(req)
+	v := new(Address)
+	_, err = s.client.Do(req, v)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("blockchain request failed: %s", resp.Status)
-	}
-
-	err = json.NewDecoder(resp.Body).Decode(v)
-	return resp, err
+	return v, nil
 }
