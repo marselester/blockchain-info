@@ -1,7 +1,7 @@
 package blockchain
 
 import (
-	"fmt"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"testing"
@@ -11,18 +11,13 @@ func TestWalletAddresses(t *testing.T) {
 	setup()
 	defer teardown()
 
-	js := `
-{"addresses": [
-	{
-		"address": "15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S",
-		"balance": 20090584076,
-		"label": null,
-		"total_received": 335550944460
+	js, err := ioutil.ReadFile("json/merchant_list.json")
+	if err != nil {
+		t.Error(err)
 	}
-]}
-`
+
 	mux.HandleFunc("/merchant/w1731/list", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, js)
+		w.Write(js)
 	})
 
 	addrs, err := client.Wallet.Addresses()
