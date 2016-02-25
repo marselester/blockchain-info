@@ -9,13 +9,13 @@ import (
 // Output is a transaction output.
 type Output struct {
 	// Blockchain.info's internal transcation ID.
-	TxIndex uint64
+	TxIndex uint64 `json:"tx_index"`
 	// Output index.
 	N       uint32
-	Address string
+	Address string `json:"addr"`
 	// Amount in satoshis.
 	Value   uint64
-	IsSpent bool
+	IsSpent bool `json:"spent"`
 	Script  string
 }
 
@@ -33,7 +33,7 @@ type Tx struct {
 	BlockHeight uint32    `json:"block_height"`
 	Timestamp   Timestamp `json:"time"`
 	Inputs      []Input
-	Outputs     []Output
+	Outputs     []Output `json:"out"`
 }
 
 // Address provides a summary of Bitcoin address.
@@ -60,7 +60,7 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// BlockchainService handles communication with the Blockchain.info Block Explorer API.
+// blockchainService handles communication with the Blockchain.info Block Explorer API.
 type blockchainService struct {
 	client *Client
 }

@@ -15,7 +15,7 @@ fmt.Println(c.Wallet.Addresses())
 
 ## Block Explorer API
 
-### Get Address Summary
+### Get Address
 
 Address represents https://blockchain.info/address/13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY?format=json
 resource.

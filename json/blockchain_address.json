@@ -29,7 +29,7 @@
       "type": 0,
       "addr": "3LKxFxbYeQaaRrKE1zRBxrHSzZftuTUDKB",
       "value": 4599990000,
-      "n": 0,
+      "n": 1,
       "script": "a914cc6e98586ab52d57bd6272b89295f943d1544a8687"
     }],
     "lock_time": 0,
