@@ -21,7 +21,7 @@ type Output struct {
 
 // Input is a transaction input.
 type Input struct {
-	PrevOutput *Output
+	PrevOutput Output `json:"prev_out"`
 	Script     string
 }
 

@@ -138,3 +138,42 @@ func TestBlockchainAddressTxsOutput(t *testing.T) {
 		t.Errorf("Blockchain.Address output script %q, want %q", out.Script, script)
 	}
 }
+
+func TestBlockchainAddressTxsInput(t *testing.T) {
+	setup()
+	defer teardown()
+
+	js, err := ioutil.ReadFile("json/blockchain_address.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	address := "13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY"
+	mux.HandleFunc("/address/13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY", func(w http.ResponseWriter, r *http.Request) {
+		w.Write(js)
+	})
+
+	a, err := client.Blockchain.Address(address)
+	if err != nil {
+		t.Error(err)
+	}
+
+	in := a.Txs[0].Inputs[0]
+
+	script := "483045022100ecaa92d4133e5aa77a0b7e9f9faf7f5562d5ff43d1b0b3d9af41578086a4d711022047eb75d22d696c28730ff66d16dd9307cc1a62ba6babd608e2c84468af10e4640121031f6e9b8aaaf76d05afff3fe8536eaa72387e0c0cf040e75d6bc85ce314c7dba5"
+	if in.Script != script {
+		t.Errorf("Blockchain.Address input script %q, want %q", in.Script, script)
+	}
+
+	out := Output{
+		TxIndex: 114831414,
+		N:       1,
+		Address: "1Bbq8wAAk3jFT7sdtArhsJrCisosHMxhKy",
+		Value:   4600000000,
+		IsSpent: true,
+		Script:  "76a9147447954676fac24a2c72a5b92407ead8157411e888ac",
+	}
+	if in.PrevOutput != out {
+		t.Errorf("Blockchain.Address input previous output %v, want %v", in.PrevOutput, out)
+	}
+}

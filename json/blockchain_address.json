@@ -7,10 +7,9 @@
   "final_balance": 315460360384,
   "txs": [{
     "ver": 1,
-    "inputs": [
-      {
-        "sequence": 4294967295,
-        "prev_out": {
+    "inputs": [{
+      "sequence": 4294967295,
+      "prev_out": {
         "spent": true,
         "tx_index": 114831414,
         "type": 0,
@@ -19,7 +18,7 @@
         "n": 1,
         "script": "76a9147447954676fac24a2c72a5b92407ead8157411e888ac"
       },
-      "script": "483045022100ecaa92d4133e5aa77a0b7e9f9faf7f5562d5ff43d1b0b3d9af41578086a4d711022047eb75d22d696c28730ff66d16dd9307cc1a62ba6babd608e2c84468af10e4640121031f6e9b8aaaf76d05afff3fe8536eaa72387e0c0cf040e75d6bc85ce314c7dba5"
+    	"script": "483045022100ecaa92d4133e5aa77a0b7e9f9faf7f5562d5ff43d1b0b3d9af41578086a4d711022047eb75d22d696c28730ff66d16dd9307cc1a62ba6babd608e2c84468af10e4640121031f6e9b8aaaf76d05afff3fe8536eaa72387e0c0cf040e75d6bc85ce314c7dba5"
     }],
     "block_height": 387122,
     "relayed_by": "127.0.0.1",
