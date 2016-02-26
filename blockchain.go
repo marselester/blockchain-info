@@ -9,12 +9,12 @@ import (
 // Output is a transaction output.
 type Output struct {
 	// Blockchain.info's internal transcation ID.
-	TxIndex uint64 `json:"tx_index"`
+	TxIndex int64 `json:"tx_index"`
 	// Output index.
-	N       uint32
+	N       int32
 	Address string `json:"addr"`
 	// Amount in satoshis.
-	Value   uint64
+	Value   int64
 	IsSpent bool `json:"spent"`
 	Script  string
 }
@@ -28,9 +28,9 @@ type Input struct {
 // Tx represents a Bitcoin transaction.
 type Tx struct {
 	// Blockchain.info's internal transcation ID.
-	Index       uint64 `json:"tx_index"`
+	Index       int64 `json:"tx_index"`
 	Hash        string
-	BlockHeight uint32    `json:"block_height"`
+	BlockHeight int32     `json:"block_height"`
 	Timestamp   Timestamp `json:"time"`
 	Inputs      []Input
 	Outputs     []Output `json:"out"`
@@ -39,10 +39,10 @@ type Tx struct {
 // Address provides a summary of Bitcoin address.
 type Address struct {
 	Address       string
-	TxCount       uint   `json:"n_tx"`
-	TotalReceived uint64 `json:"total_received"`
-	TotalSent     uint64 `json:"total_sent"`
-	FinalBalance  int64  `json:"final_balance"`
+	TxCount       int   `json:"n_tx"`
+	TotalReceived int64 `json:"total_received"`
+	TotalSent     int64 `json:"total_sent"`
+	FinalBalance  int64 `json:"final_balance"`
 	Txs           []Tx
 }
 
