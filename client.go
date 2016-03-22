@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
+	"time"
 )
 
 const (
@@ -84,4 +86,43 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 
 	err = json.NewDecoder(resp.Body).Decode(v)
 	return resp, err
+}
+
+var (
+	// ReqLimit defines how many requests are allowed to be sent in ReqWindow.
+	// Default value is 6 requests in 5 minutes.
+	ReqLimit = 6
+	// ReqWindow is how long we should wait before trying to send another requests.
+	ReqWindow = time.Duration(5 * time.Minute)
+)
+var throttle = struct {
+	sync.Mutex
+	// reqCount is how many requests were sent in a ReqWindow.
+	reqCount int
+	// firstReqSentAt is when we started a ReqWindow.
+	firstReqSentAt time.Time
+}{}
+
+// IsReqThrottled helps to keep track of API requests to avoid hitting API limits.
+// When limit is reached, it returns estimated time when it's ok to try again.
+func IsReqThrottled() (bool, time.Duration) {
+	throttle.Lock()
+	defer throttle.Unlock()
+
+	if throttle.reqCount >= ReqLimit {
+		// Let's check if we can send more requests.
+		elapsed := time.Since(throttle.firstReqSentAt)
+		if elapsed >= ReqWindow {
+			throttle.reqCount = 0
+		} else {
+			// Estimated time for next request attempt.
+			return true, ReqWindow - elapsed
+		}
+	}
+
+	throttle.reqCount++
+	if throttle.reqCount == 1 {
+		throttle.firstReqSentAt = time.Now()
+	}
+	return false, time.Duration(0)
 }
