@@ -22,6 +22,7 @@ type Client struct {
 	MerchantURL  string
 	WalletID     string
 	MainPassword string
+	APICode      string // API Code to bypass the request limiter.
 
 	Wallet     *walletService
 	Blockchain *blockchainService
@@ -29,7 +30,7 @@ type Client struct {
 
 // NewClient returns a new Blockchain.info API client. If a nil httpClient is
 // provided, http.DefaultClient will be used.
-func NewClient(httpClient *http.Client, wallet, pass string) *Client {
+func NewClient(httpClient *http.Client, wallet, pass, code string) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -40,6 +41,7 @@ func NewClient(httpClient *http.Client, wallet, pass string) *Client {
 		MerchantURL:  merchantURL,
 		WalletID:     wallet,
 		MainPassword: pass,
+		APICode:      code,
 	}
 	c.Wallet = &walletService{client: c}
 	c.Blockchain = &blockchainService{client: c}
@@ -48,9 +50,20 @@ func NewClient(httpClient *http.Client, wallet, pass string) *Client {
 
 // NewRequest creates a request to the public API.
 func (c *Client) NewRequest(path string) (*http.Request, error) {
-	urlStr := fmt.Sprintf("%s/%s?format=json", c.BaseURL, path)
+	urlStr := fmt.Sprintf("%s/%s", c.BaseURL, path)
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, err
+	}
 
-	req, err := http.NewRequest("GET", urlStr, nil)
+	q := u.Query()
+	q.Set("format", "json")
+	if c.APICode != "" {
+		q.Set("api_code", c.APICode)
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest("GET", u.String(), nil)
 	return req, err
 }
 
@@ -64,6 +77,9 @@ func (c *Client) NewMerchantRequest(path string) (*http.Request, error) {
 
 	q := u.Query()
 	q.Set("password", c.MainPassword)
+	if c.APICode != "" {
+		q.Set("api_code", c.APICode)
+	}
 	u.RawQuery = q.Encode()
 
 	req, err := http.NewRequest("GET", u.String(), nil)

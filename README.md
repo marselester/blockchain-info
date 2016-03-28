@@ -8,7 +8,10 @@ and [stripe-go](https://github.com/stripe/stripe-go/).
 ### List Addresses
 
 ```go
-c := blockchain.NewClient(nil, "w1731", "R@GK")
+walletID := "w1731"
+walletPass := "R@GK"
+apiCode := "123" // Set apiCode to bypass the request limiter.
+c := blockchain.NewClient(nil, walletID, walletPass, apiCode)
 fmt.Println(c.Wallet.Addresses())
 // [{13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY  20090584076}]
 ```
@@ -21,7 +24,9 @@ Address represents https://blockchain.info/address/13R9dBgKwBP29JKo11zhfi74YuBsM
 resource.
 
 ```go
-c := blockchain.NewClient(nil, "", "")
+// Set apiCode to bypass the request limiter.
+apiCode := "123"
+c := blockchain.NewClient(nil, "", "", apiCode)
 fmt.Println(c.Blockchain.Address("13R9dBgKwBP29JKo11zhfi74YuBsMxJ4qY"))
 ```
 

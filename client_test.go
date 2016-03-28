@@ -8,7 +8,8 @@ import (
 func TestNewClient(t *testing.T) {
 	walletID := "w1731"
 	mainPass := "R@GK"
-	c := NewClient(nil, walletID, mainPass)
+	apiCode := "123"
+	c := NewClient(nil, walletID, mainPass, apiCode)
 
 	if c.HTTPClient != http.DefaultClient {
 		t.Errorf("NewClient should have default HTTP client, got %v", c.HTTPClient)
@@ -31,10 +32,14 @@ func TestNewClient(t *testing.T) {
 	if c.MainPassword != mainPass {
 		t.Errorf("NewClient wrong main password %q, want %q", c.MainPassword, mainPass)
 	}
+
+	if c.APICode != apiCode {
+		t.Errorf("NewClient API code %s, want %s", c.APICode, apiCode)
+	}
 }
 
 func TestClientNewRequest(t *testing.T) {
-	c := NewClient(nil, "", "")
+	c := NewClient(nil, "", "", "")
 	req, err := c.NewRequest("address/15zyMv6T4SGkZ9ka3dj1BvSftvYuVVB66S")
 	if err != nil {
 		t.Error(err)
@@ -51,7 +56,7 @@ func TestClientNewRequest(t *testing.T) {
 }
 
 func TestClientNewMerchantRequest(t *testing.T) {
-	c := NewClient(nil, "w1731", "R@GK")
+	c := NewClient(nil, "w1731", "R@GK", "")
 	req, err := c.NewMerchantRequest("list")
 	if err != nil {
 		t.Error(err)

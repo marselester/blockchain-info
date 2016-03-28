@@ -22,7 +22,7 @@ func setup() {
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
 
-	client = NewClient(nil, "w1731", "R@GK")
+	client = NewClient(nil, "w1731", "R@GK", "")
 	url, _ := url.Parse(server.URL)
 	client.BaseURL = url.String()
 	client.MerchantURL = url.String() + "/merchant"
